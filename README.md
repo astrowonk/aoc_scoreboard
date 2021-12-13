@@ -19,6 +19,6 @@ scores.make_daily_leaderboard()
 
 
 ### Screenshots from Jupyter
-![image](https://user-images.githubusercontent.com/13702392/145860760-25edf63f-47cd-452e-830e-0ddad1d2528f.png)
+
 
 ![Screen Shot 2021-12-13 at 12 35 57 PM](https://user-images.githubusercontent.com/13702392/145860893-08c0833a-75cd-49a2-9eca-9d3b0490d9e3.png)
