@@ -127,6 +127,18 @@ class AOCScoreboard():
         """export the base level dataframe to a csv file"""
         self.df.to_csv(make_new_file_name(self.json_file_name, 'csv'))
 
+    def minutes_between_stars(self):
+        res = self.df.groupby(['day', 'name'])['time'].agg([
+            'max', 'min'
+        ]).assign(minutes_between_stars=lambda x: (x['max'] - x['min']))
+        res['minutes_between_stars'] = res['minutes_between_stars'].apply(
+            lambda x: x.total_seconds() / 60)
+
+        return res.reset_index().pivot_table(index='name',
+                                             columns='day',
+                                             values='minutes_between_stars',
+                                             aggfunc=max)
+
 
 if __name__ == "__main__":
     import argparse
