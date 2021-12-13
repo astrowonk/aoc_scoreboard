@@ -15,6 +15,9 @@ scores.df
 ## axis name, columns points by day
 scores.make_daily_leaderboard()
 
+## Minutes between stars by day for each user
+scores.minutes_between_stars()
+
 ```
 
 
