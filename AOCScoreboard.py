@@ -54,7 +54,9 @@ class AOCScoreboard():
             out = self.compute_points_day(res, self.leaderboard_size, day)
             final_res.extend(out)
         self.df = pd.DataFrame(final_res)
-        self.df.sort_values(['day', 'star'], inplace=True)
+        self.df['day'] = self.df['day'].astype(int)
+        self.df = self.df.sort_values(
+            ['day', 'star', 'time'], ).reset_index(drop=True)
         self.df['running_total_points'] = self.df.groupby(
             ['name'])['points'].cumsum()
         return
