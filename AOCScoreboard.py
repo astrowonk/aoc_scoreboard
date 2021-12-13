@@ -56,7 +56,7 @@ class AOCScoreboard():
         self.df = pd.DataFrame(final_res)
         self.df['day'] = self.df['day'].astype(int)
         self.df = self.df.sort_values(
-            ['day', 'star', 'time'], ).reset_index(drop=True)
+            ['time', 'day', 'star'], ).reset_index(drop=True)
         self.df['running_total_points'] = self.df.groupby(
             ['name'])['points'].cumsum()
         return
@@ -107,10 +107,14 @@ class AOCScoreboard():
         self.completion_day_dict = completion_day_dict
         self.leaderboard_size = len(self.json_data['members'])
 
-    def plot_line(self):
-        return self.df.plot.line(x='time',
-                                 y='running_total_points',
-                                 color='name')
+    def line_graph(self):
+        try:
+            return self.df.plot.line(x='time',
+                                     y='running_total_points',
+                                     color='name',
+                                     backend='plotly')
+        except ValueError:
+            print("Line plot requires plotly backend")
 
     def process_json_file(self, json_file):
         self.json_file_name = json_file
