@@ -18,11 +18,14 @@ class AOCScoreboard():
 
     json_file_name = None
 
-    def __init__(self, json_file) -> None:
-        self.process_json_file(json_file)
-
-    def get_df(self):
-        return self.df
+    def __init__(self, json_file=None, json_dict=None) -> None:
+        """Either process a json file or a load a dict already created"""
+        if json_file:
+            self.process_json_file(json_file)
+        else:
+            self.json_data = json_dict
+            self.create_completion_day_dict()
+            self.make_df()
 
     @staticmethod
     def compute_points_star(x, n):
@@ -36,18 +39,18 @@ class AOCScoreboard():
         star1 = self.compute_points_star(x['star1'], leaderboard_size)
         star2 = self.compute_points_star(x['star2'], leaderboard_size)
         return [{
-            'day': day,
-            'star': 1,
-            'points': val,
-            'name': key[1],
-            'time': datetime.datetime.fromtimestamp(key[0])
+            'Day': day,
+            'Star': 1,
+            'Points': val,
+            'Name': key[1],
+            'Date': datetime.datetime.fromtimestamp(key[0])
         } for key, val in star1.items()
                 ] + [{
-                    'day': day,
-                    'star': 2,
-                    'points': val,
-                    'name': key[1],
-                    'time': datetime.datetime.fromtimestamp(key[0])
+                    'Day': day,
+                    'Star': 2,
+                    'Points': val,
+                    'Name': key[1],
+                    'Date': datetime.datetime.fromtimestamp(key[0])
                 } for key, val in star2.items()]
 
     def make_df(self):
@@ -56,40 +59,41 @@ class AOCScoreboard():
             out = self.compute_points_day(res, self.leaderboard_size, day)
             final_res.extend(out)
         self.df = pd.DataFrame(final_res)
-        self.df['day'] = self.df['day'].astype(int)
+        self.df['Day'] = self.df['Day'].astype(int)
         self.df = self.df.sort_values(
-            ['time', 'day', 'star'], ).reset_index(drop=True)
-        self.df['running_total_points'] = self.df.groupby(
-            ['name'])['points'].cumsum()
+            ['Date', 'Day', 'Star'], ).reset_index(drop=True)
+        self.df['Total Points'] = self.df.groupby(['Name'])['Points'].cumsum()
         return
 
     def make_daily_leaderboard(self, show_possibles=True):
         """make a dataframe with point totals by day"""
         df = self.df.pivot_table(
-            index='name',
-            columns=['day'],
-            values='points',
+            index='Name',
+            columns=['Day'],
+            values='Points',
             aggfunc=sum,
         )
         df = df[sorted(df.columns, key=lambda x: int(x))]
 
-        df['total'] = df.T.sum()
-        df.sort_values('total', ascending=False, inplace=True)
+        df['Total'] = df.T.sum()
+        df.sort_values('Total', ascending=False, inplace=True)
         #hypotheticals
-        df.drop(
-            columns=['total', 'Worst Possible Total', 'Best Possible Total'],
-            inplace=True,
-            errors='ignore')
-        df['Best Possible Total'] = df.fillna((df.min() - 2).to_dict()).T.sum()
-        df['Worst Possible Total'] = df.drop(
-            columns=['Best Possible Total']).fillna(2).T.sum()
-        df['total'] = df.T.drop(
-            ['Worst Possible Total', 'Best Possible Total']).sum()
+        df.drop(columns=[
+            'Total', 'Lowest Possible Total', 'Highest Possible Total'
+        ],
+                inplace=True,
+                errors='ignore')
+        df['Highest Possible Total'] = df.fillna(
+            (df.min() - 2).to_dict()).T.sum()
+        df['Lowest Possible Total'] = df.drop(
+            columns=['Highest Possible Total']).fillna(2).T.sum()
+        df['Total'] = df.T.drop(
+            ['Lowest Possible Total', 'Highest Possible Total']).sum()
         if show_possibles:
             return df
         else:
             return df.drop(
-                columns=['Worst Possible Total', 'Best Possible Total'],
+                columns=['Lowest Possible Total', 'Highest Possible Total'],
                 errors='ignore')
 
     def create_completion_day_dict(self):
@@ -111,9 +115,9 @@ class AOCScoreboard():
 
     def line_graph(self):
         try:
-            return self.df.plot.line(x='time',
-                                     y='running_total_points',
-                                     color='name',
+            return self.df.plot.line(x='Date',
+                                     y='Total Points',
+                                     color='Name',
                                      backend='plotly')
         except ValueError:
             print("Line plot requires plotly backend")
@@ -130,14 +134,14 @@ class AOCScoreboard():
         self.df.to_csv(make_new_file_name(self.json_file_name, 'csv'))
 
     def minutes_between_stars(self):
-        res = self.df.groupby(['day', 'name'])['time'].agg([
+        res = self.df.groupby(['Day', 'Name'])['Date'].agg([
             'max', 'min'
         ]).assign(minutes_between_stars=lambda x: (x['max'] - x['min']))
         res['minutes_between_stars'] = res['minutes_between_stars'].apply(
             lambda x: x.total_seconds() / 60)
 
-        return res.reset_index().pivot_table(index='name',
-                                             columns='day',
+        return res.reset_index().pivot_table(index='Name',
+                                             columns='Day',
                                              values='minutes_between_stars',
                                              aggfunc=max)
 
