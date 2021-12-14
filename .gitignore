@@ -1,3 +1,6 @@
 __pycache__/*
 *.json
 *.html
+*.egg-info/
+dist/
+build/
