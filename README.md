@@ -3,7 +3,7 @@
 
 This class will parse a JSON file from the API listed on an [Advent of Code](https://adventofcode.com) private scoreboard into pandas dataframes.
 
-This module powers the [AOC Dashboard](https://github.com/astrowonk/aoc_dashboard) which is a [Plotly Dash](https://dash.plotly.com) web app that renders charts and tables based on user-uploaded .json file from the AoC site.
+This module powers the [AOC Dashboard](https://github.com/astrowonk/aoc_dashboard) which is a [Plotly Dash](https://dash.plotly.com) web app that renders charts and tables based on user-uploaded .json file from the AoC site. [The web app is running live on my web site](https://marcoshuerta.com/dash/aoc/), if you want to check it out.
 
 Usage:
 
