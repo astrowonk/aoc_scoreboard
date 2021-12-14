@@ -1,7 +1,9 @@
 
 ## Advent of Code Scoreboard
 
-This class will parse a JSON file from the API listed on an [Advent of Code](https://adventofcode.com) private scoreboard into pandas dataframes. Very much a work in progress, I hope to make setup.py file soon, and then maybe on to pypi.
+This class will parse a JSON file from the API listed on an [Advent of Code](https://adventofcode.com) private scoreboard into pandas dataframes.
+
+This module powers the [AOC Dashboard](https://github.com/astrowonk/aoc_dashboard) which is a [Plotly Dash](https://dash.plotly.com) web app that renders charts and tables based on user-uploaded .json file from the AoC site.
 
 Usage:
 
