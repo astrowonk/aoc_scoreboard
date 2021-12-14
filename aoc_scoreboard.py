@@ -84,7 +84,7 @@ class AOCScoreboard():
                 inplace=True,
                 errors='ignore')
         highest = df.fillna((df.min() - 2).to_dict()).T.sum()
-        lowest = df.drop(columns=['Highest Possible Total']).fillna(2).T.sum()
+        lowest = df.fillna(2).T.sum()
 
         df['Total'] = df.T.sum()
         df['Highest Possible Total'] = highest
