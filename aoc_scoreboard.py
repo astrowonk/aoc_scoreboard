@@ -83,8 +83,30 @@ class AOCScoreboard():
         ],
                 inplace=True,
                 errors='ignore')
-        highest = df.fillna((df.min() - 2).to_dict()).T.sum()
-        lowest = df.fillna(2).T.sum()
+
+        #there must be a better way...
+        best_possible_one_star = df.copy()
+        worst_possible_one_star = df.copy()
+
+        # count stars check for only 1 star
+        df2 = self.df.pivot_table(
+            index='Name',
+            columns=['Day'],
+            values='Star',
+            aggfunc='count',
+        )
+
+        #double any one star rows
+
+        best_possible_one_star[df2 == 1] = best_possible_one_star[
+            df2 == 1].add((best_possible_one_star[df2 == 1].min(axis=0) + 1))
+
+        #but could get the second star last
+        worst_possible_one_star[df2 ==
+                                1] = worst_possible_one_star[df2 == 1] + 2
+        highest = best_possible_one_star.fillna(
+            (best_possible_one_star.min() - 2).to_dict()).T.sum()
+        lowest = worst_possible_one_star.fillna(2).T.sum()
 
         df['Total'] = df.T.sum()
         df['Highest Possible Total'] = highest
