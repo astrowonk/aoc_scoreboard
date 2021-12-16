@@ -3,12 +3,25 @@
 
 This class will parse a JSON file from the API listed on an [Advent of Code](https://adventofcode.com) private scoreboard into pandas dataframes.
 
+You should be able to install with 
+
+```
+python setup.py install
+```
+
+or even 
+
+```
+pip install .
+```
+
+
 This module powers the [AOC Dashboard](https://github.com/astrowonk/aoc_dashboard) which is a [Plotly Dash](https://dash.plotly.com) web app that renders charts and tables based on user-uploaded .json file from the AoC site. [The web app is running live on my web site](https://marcoshuerta.com/dash/aoc/), if you want to check it out.
 
 Usage:
 
 ```
-from AOCScoreboard import AOCScoreboard
+from aoc_scoreboard import AOCScoreboard
 scores = AOCScoreboard('myfile.json')
 
 ## one row per name, time, day, star, points, and running total points
