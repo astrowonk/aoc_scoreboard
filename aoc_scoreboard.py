@@ -2,6 +2,7 @@ import pandas as pd
 import re
 import json
 import datetime
+import random
 
 __VERSION__ = '0.1.0'
 
@@ -18,8 +19,13 @@ class AOCScoreboard():
 
     json_file_name = None
 
-    def __init__(self, json_file=None, json_dict=None) -> None:
+    def __init__(self,
+                 json_file=None,
+                 json_dict=None,
+                 randomize_user_names=False) -> None:
         """Either process a json file or a load a dict already created"""
+        self.randomize_user_names = randomize_user_names
+
         if json_file:
             self.process_json_file(json_file)
         else:
@@ -63,6 +69,15 @@ class AOCScoreboard():
         self.df = self.df.sort_values(
             ['Date', 'Day', 'Star'], ).reset_index(drop=True)
         self.df['Total Points'] = self.df.groupby(['Name'])['Points'].cumsum()
+        if self.randomize_user_names:
+            unique_names = self.df['Name'].unique()
+            random_index = list(range(0, len(unique_names)))
+            random.shuffle(random_index)
+            name_map = {
+                name: f"User {random_index[i]}"
+                for i, name in enumerate(unique_names)
+            }
+            self.df['Name'] = self.df['Name'].map(name_map)
         return
 
     def make_daily_leaderboard(self, show_possibles=True):
