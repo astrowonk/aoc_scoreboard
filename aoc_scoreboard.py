@@ -15,14 +15,10 @@ def make_new_file_name(file_name, suffix='csv'):
     return file_name + suffix
 
 
-class AOCScoreboard():
-
+class AOCScoreboard:
     json_file_name = None
 
-    def __init__(self,
-                 json_file=None,
-                 json_dict=None,
-                 randomize_user_names=False) -> None:
+    def __init__(self, json_file=None, json_dict=None, randomize_user_names=False) -> None:
         """Either process a json file or a load a dict already created"""
         self.randomize_user_names = randomize_user_names
 
@@ -38,26 +34,31 @@ class AOCScoreboard():
         x = [y for y in x if y[0] is not None]
         x.sort(key=lambda x: x[0])
         sorted_name = [x[1] for x in x]
-        #return point dictionary
+        # return point dictionary
         return {key: val for key, val in zip(x, range(n, 0, -1))}
 
     def compute_points_day(self, x, leaderboard_size, day):
         star1 = self.compute_points_star(x['star1'], leaderboard_size)
         star2 = self.compute_points_star(x['star2'], leaderboard_size)
-        return [{
-            'Day': day,
-            'Star': 1,
-            'Points': val,
-            'Name': key[1],
-            'Date': datetime.datetime.fromtimestamp(key[0])
-        } for key, val in star1.items()
-                ] + [{
-                    'Day': day,
-                    'Star': 2,
-                    'Points': val,
-                    'Name': key[1],
-                    'Date': datetime.datetime.fromtimestamp(key[0])
-                } for key, val in star2.items()]
+        return [
+            {
+                'Day': day,
+                'Star': 1,
+                'Points': val,
+                'Name': key[1],
+                'Date': datetime.datetime.fromtimestamp(key[0]),
+            }
+            for key, val in star1.items()
+        ] + [
+            {
+                'Day': day,
+                'Star': 2,
+                'Points': val,
+                'Name': key[1],
+                'Date': datetime.datetime.fromtimestamp(key[0]),
+            }
+            for key, val in star2.items()
+        ]
 
     def make_df(self):
         final_res = []
@@ -67,16 +68,14 @@ class AOCScoreboard():
         self.df = pd.DataFrame(final_res)
         self.df['Day'] = self.df['Day'].astype(int)
         self.df = self.df.sort_values(
-            ['Date', 'Day', 'Star'], ).reset_index(drop=True)
+            ['Date', 'Day', 'Star'],
+        ).reset_index(drop=True)
         self.df['Total Points'] = self.df.groupby(['Name'])['Points'].cumsum()
         if self.randomize_user_names:
             unique_names = self.df['Name'].unique()
             random_index = list(range(0, len(unique_names)))
             random.shuffle(random_index)
-            name_map = {
-                name: f"User {random_index[i]}"
-                for i, name in enumerate(unique_names)
-            }
+            name_map = {name: f'User {random_index[i]}' for i, name in enumerate(unique_names)}
             self.df['Name'] = self.df['Name'].map(name_map)
         return
 
@@ -92,14 +91,14 @@ class AOCScoreboard():
 
         df['Total'] = df.T.sum()
         df.sort_values('Total', ascending=False, inplace=True)
-        #hypotheticals
-        df.drop(columns=[
-            'Total', 'Lowest Possible Total', 'Highest Possible Total'
-        ],
-                inplace=True,
-                errors='ignore')
+        # hypotheticals
+        df.drop(
+            columns=['Total', 'Lowest Possible Total', 'Highest Possible Total'],
+            inplace=True,
+            errors='ignore',
+        )
 
-        #there must be a better way...
+        # there must be a better way...
         best_possible_one_star = df.copy()
         worst_possible_one_star = df.copy()
 
@@ -111,16 +110,15 @@ class AOCScoreboard():
             aggfunc='count',
         )
 
-        #double any one star rows
+        # double any one star rows
 
-        best_possible_one_star[df2 == 1] = best_possible_one_star[
-            df2 == 1].add((best_possible_one_star[df2 == 1].min(axis=0)))
+        best_possible_one_star[df2 == 1] = best_possible_one_star[df2 == 1].add(
+            (best_possible_one_star[df2 == 1].min(axis=0))
+        )
 
-        #but could get the second star last
-        worst_possible_one_star[df2 ==
-                                1] = worst_possible_one_star[df2 == 1] + 2
-        highest = best_possible_one_star.fillna(
-            (best_possible_one_star.min() - 2)).T.sum()
+        # but could get the second star last
+        worst_possible_one_star[df2 == 1] = worst_possible_one_star[df2 == 1] + 2
+        highest = best_possible_one_star.fillna((best_possible_one_star.min() - 2)).T.sum()
         lowest = worst_possible_one_star.fillna(2).T.sum()
 
         df['Total'] = df.T.sum()
@@ -130,34 +128,29 @@ class AOCScoreboard():
             return df
         else:
             return df.drop(
-                columns=['Lowest Possible Total', 'Highest Possible Total'],
-                errors='ignore')
+                columns=['Lowest Possible Total', 'Highest Possible Total'], errors='ignore'
+            )
 
     def create_completion_day_dict(self):
         completion_day_dict = {}
         for member_name, member_dict in self.json_data['members'].items():
             for day, val in member_dict['completion_day_level'].items():
-                completion_day_dict.setdefault(day, {}).setdefault(
-                    'star1', []).append(
-                        (val.get('1',
-                                 {}).get('get_star_ts'), member_dict['name']
-                         or member_name))
-                completion_day_dict.setdefault(day, {}).setdefault(
-                    'star2', []).append(
-                        (val.get('2',
-                                 {}).get('get_star_ts'), member_dict['name']
-                         or member_name))
+                completion_day_dict.setdefault(day, {}).setdefault('star1', []).append(
+                    (val.get('1', {}).get('get_star_ts'), member_dict['name'] or member_name)
+                )
+                completion_day_dict.setdefault(day, {}).setdefault('star2', []).append(
+                    (val.get('2', {}).get('get_star_ts'), member_dict['name'] or member_name)
+                )
         self.completion_day_dict = completion_day_dict
         self.leaderboard_size = len(self.json_data['members'])
 
     def line_graph(self):
         try:
-            return self.df.plot.line(x='Date',
-                                     y='Total Points',
-                                     color='Name',
-                                     backend='plotly')
+            return self.df.plot.line(
+                x='Date', y='Total Points', color='Name', backend='plotly'
+            )
         except ValueError:
-            print("Line plot requires plotly backend")
+            print('Line plot requires plotly backend')
 
     def process_json_file(self, json_file):
         self.json_file_name = json_file
@@ -171,20 +164,23 @@ class AOCScoreboard():
         self.df.to_csv(make_new_file_name(self.json_file_name, 'csv'))
 
     def minutes_between_stars(self):
-        res = self.df.groupby(['Day', 'Name'])['Date'].agg([
-            'max', 'min'
-        ]).assign(minutes_between_stars=lambda x: (x['max'] - x['min']))
+        res = (
+            self.df.groupby(['Day', 'Name'])['Date']
+            .agg(['max', 'min'])
+            .assign(minutes_between_stars=lambda x: (x['max'] - x['min']))
+        )
         res['minutes_between_stars'] = res['minutes_between_stars'].apply(
-            lambda x: x.total_seconds() / 60)
+            lambda x: x.total_seconds() / 60
+        )
 
-        return res.reset_index().pivot_table(index='Name',
-                                             columns='Day',
-                                             values='minutes_between_stars',
-                                             aggfunc=max)
+        return res.reset_index().pivot_table(
+            index='Name', columns='Day', values='minutes_between_stars', aggfunc='max'
+        )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument('json_file', type=str)
     args = parser.parse_args()
