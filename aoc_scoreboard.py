@@ -1,10 +1,12 @@
-import pandas as pd
-import re
-import json
 import datetime
+import json
 import random
+import re
 
-__VERSION__ = '0.1.1'
+import pandas as pd
+import plotly.express as px
+
+__VERSION__ = '0.1.2'
 
 
 def make_new_file_name(file_name, suffix='csv'):
@@ -145,12 +147,14 @@ class AOCScoreboard:
         self.leaderboard_size = len(self.json_data['members'])
 
     def line_graph(self):
-        try:
-            return self.df.plot.line(
-                x='Date', y='Total Points', color='Name', backend='plotly'
-            )
-        except ValueError:
-            print('Line plot requires plotly backend')
+        return px.line(
+            self.df,
+            x='Date',
+            y='Total Points',
+            color='Name',
+            markers=True,
+            hover_data={'Date': ':%b %m, %d, %H:%M:%S'},
+        )
 
     def process_json_file(self, json_file):
         self.json_file_name = json_file
